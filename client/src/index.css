@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+#yellow F6E278
+#ice cold BCF4F5
+#vista blue 98DBC6 
+#green 00A6A6
+#marvelous F18D9E
+#sunflower E6D72A
+*/
+
+* {
+  margin: 0;
+  padding: 0;
+}
