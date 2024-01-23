@@ -11,6 +11,7 @@ func NewRouter() *mux.Router {
 
 	r.Use(middleware.AuthenticationMiddleware())
 	r.HandleFunc("/", handlers.HomeHandler).Methods("GET")
+	r.HandleFunc("/capsule", handlers.CreateCapsule).Methods("POST")
 
 	return r
 }
