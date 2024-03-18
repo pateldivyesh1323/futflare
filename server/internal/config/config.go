@@ -12,6 +12,7 @@ var (
 	MongoDBDatabase string
 	AuthDomain      string
 	AuthAudience    string
+	AuthSecret      string
 )
 
 func init() {
@@ -22,4 +23,5 @@ func init() {
 	MongoDBDatabase = os.Getenv("MONGODB_DATABASE_NAME")
 	AuthDomain = os.Getenv("AUTH_DOMAIN")
 	AuthAudience = os.Getenv("AUTH_AUDIENCE")
+	AuthSecret = os.Getenv("AUTH_SECRET")
 }

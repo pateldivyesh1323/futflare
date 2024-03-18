@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -67,6 +68,7 @@ func AuthenticationMiddleware() func(next http.Handler) http.Handler {
 }
 
 func (c CustomClaims) HasScope(expectedScope string) bool {
+	fmt.Println(c)
 	result := strings.Split(c.Scope, " ")
 	for i := range result {
 		if result[i] == expectedScope {

@@ -11,5 +11,5 @@ import (
 func main() {
 	fmt.Println("Server fired on http://localhost:8000...")
 	r := router.NewRouter()
-	log.Fatal(http.ListenAndServe(":8000", r))
+	log.Fatal(http.ListenAndServe("127.0.0.1:8000", r))
 }

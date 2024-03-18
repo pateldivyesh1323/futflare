@@ -11,5 +11,5 @@ type Capsule struct {
 	Message  string             `bson:"message,omitempty"`
 	Memories []string           `bson:"memories,omitempty"`
 	Status   string             `bson:"status"`
-	Email    string             `bson:"email"`
+	Member   []string           `bson:"email"`
 }
