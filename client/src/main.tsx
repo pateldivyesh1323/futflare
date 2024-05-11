@@ -6,6 +6,7 @@ import { Auth0Provider } from '@auth0/auth0-react'
 import enviroments from './enviroment.ts'
 import { UserAuthProvider } from './providers/UserAuthProvider.tsx'
 import { BrowserRouter } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -19,6 +20,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         }}
       >
         <UserAuthProvider>
+          <Toaster />
           <App />
         </UserAuthProvider>
       </Auth0Provider>
