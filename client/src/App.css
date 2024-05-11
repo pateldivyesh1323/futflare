@@ -1,0 +1,5 @@
+@import "@radix-ui/colors/sky.css";
+
+.bg-blue {
+    background-color: var(--sky-9);
+}

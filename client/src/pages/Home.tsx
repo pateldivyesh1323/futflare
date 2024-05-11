@@ -5,6 +5,7 @@ import axios from "axios";
 import enviroment from "../enviroment";
 import toast from "react-hot-toast";
 import { getErrorMsg } from "../utils/error";
+import { Button, Heading } from "@radix-ui/themes";
 
 const Home = (): React.ReactElement => {
     const { getAccessToken } = useUserAuth();
@@ -47,9 +48,10 @@ const Home = (): React.ReactElement => {
 
     return (
         <div className="w-[80%] m-auto">
-            <button onClick={handleGetToken}>Get token</button>
-            <div className="font-semibold text-2xl">Capsules</div>
-            <hr />
+            <Button color="sky" onClick={handleGetToken}>
+                Get token
+            </Button>
+            <Heading size="6">Capsules</Heading>
             {capsules?.map((capsule) => {
                 return <div>{capsule.title}</div>;
             })}
