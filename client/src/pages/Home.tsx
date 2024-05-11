@@ -3,7 +3,7 @@ import { useUserAuth } from "../providers/UserAuthProvider";
 import { Capsule } from "../types";
 import axios from "axios";
 import enviroment from "../enviroment";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { getErrorMsg } from "../utils/error";
 import { Button, Heading } from "@radix-ui/themes";
 
