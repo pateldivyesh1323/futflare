@@ -1,6 +1,7 @@
 import React from "react";
 import { useUserAuth } from "../providers/UserAuthProvider";
 import { Button, Flex } from "@radix-ui/themes";
+import { Link } from "react-router-dom";
 
 const Navbar = (): React.ReactElement => {
     const { login, logout, isAuthenticated } = useUserAuth();
@@ -17,9 +18,9 @@ const Navbar = (): React.ReactElement => {
             px="7"
             className="bg-blue"
         >
-            <div className="text-2xl text-red font-bold font-norican">
+            <Link to="/" className="text-2xl text-red font-bold font-norican">
                 Futflare
-            </div>
+            </Link>
             {isAuthenticated ? (
                 <Button color="yellow" onClick={logout}>
                     Logout

@@ -1,5 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
-import { FC, ReactNode, createContext, useContext, useEffect, useState } from "react";
+import {
+    FC,
+    ReactNode,
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
 import { User, useAuth0 } from "@auth0/auth0-react";
 import { getErrorMsg } from "../utils/error";
 import { useNavigate } from "react-router-dom";
@@ -15,14 +22,23 @@ interface UserAuthContextInterface {
 }
 
 type PropsType = {
-    children: ReactNode
-}
+    children: ReactNode;
+};
 
-const UserAuthContext = createContext<UserAuthContextInterface | null>(null);
+export const UserAuthContext = createContext<UserAuthContextInterface | null>(
+    null
+);
 
 export const UserAuthProvider: FC<PropsType> = ({ children }) => {
-
-    const { loginWithPopup, logout, isAuthenticated, isLoading, error: auth0Error, getAccessTokenSilently, user } = useAuth0();
+    const {
+        loginWithPopup,
+        logout,
+        isAuthenticated,
+        isLoading,
+        error: auth0Error,
+        getAccessTokenSilently,
+        user,
+    } = useAuth0();
     const navigate = useNavigate();
 
     const [error, setError] = useState<string | undefined>();
@@ -36,11 +52,13 @@ export const UserAuthProvider: FC<PropsType> = ({ children }) => {
     const login = async () => {
         try {
             await loginWithPopup();
-            navigate('/home');
+            const token = await getAccessTokenSilently();
+            localStorage.setItem("auth-token", token);
+            navigate("/home");
         } catch (error: unknown) {
             setError(getErrorMsg(error));
         }
-    }
+    };
 
     const value: UserAuthContextInterface = {
         logout,
@@ -53,17 +71,17 @@ export const UserAuthProvider: FC<PropsType> = ({ children }) => {
     };
 
     return (
-        <UserAuthContext.Provider value={value}>{children}</UserAuthContext.Provider>
-    )
-}
+        <UserAuthContext.Provider value={value}>
+            {children}
+        </UserAuthContext.Provider>
+    );
+};
 
 export function useUserAuth() {
     const context = useContext(UserAuthContext);
 
     if (!context) {
-        throw new Error(
-            "useUserAuth must be used within a UserAuthProvider",
-        );
+        throw new Error("useUserAuth must be used within a UserAuthProvider");
     }
 
     return context;

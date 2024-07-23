@@ -19,5 +19,5 @@ func main() {
 	})
 	r := router.NewRouter()
 	handler := c.Handler(r)
-	log.Fatal(http.ListenAndServe("127.0.0.1:8000", handler))
+	log.Fatal(http.ListenAndServe(":8000", handler))
 }
