@@ -2,18 +2,14 @@ export interface Capsule {
     _id: string;
     creator: string;
     title: string;
-    message: string;
-    memories: string[];
-    status: StatusType;
-    member: string[];
+    description: string;
+    participants_email: string[];
+    is_opened: boolean;
+    content_items: ContentItem[];
 }
 
-export enum Status {
-    LOCKED = "LOCKED",
-    UNLOCKED = "UNLOCKED",
+export interface ContentItem {
+    type: string;
+    url: string;
+    text: string;
 }
-
-export type StatusType = {
-    Locked: Status.LOCKED;
-    UnLocked: Status.UNLOCKED;
-};

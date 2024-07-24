@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/pateldivyesh1323/futflare/server/internal/database"
 	"github.com/pateldivyesh1323/futflare/server/internal/model"
@@ -15,55 +16,63 @@ import (
 
 var capsuleCollection = database.Database.Collection("capsule")
 
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
 func CreateCapsule(w http.ResponseWriter, r *http.Request) {
 	var c model.Capsule
 	err := json.NewDecoder(r.Body).Decode(&c)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Internal server error"))
+		utils.SendJSONResponse(w, http.StatusBadRequest, "Invalid request body", nil)
+		return
 	}
 
-	if c.Title == "" || c.Message == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Please fill all required fields"))
+	if c.Title == "" || c.Description == "" || c.ScheduledOpenDate.IsZero() || len(c.ContentItems) == 0 {
+		utils.SendJSONResponse(w, http.StatusBadRequest, "Please fill all required fields and add at least one content item", nil)
+		return
+	}
+
+	if c.ScheduledOpenDate.Before(time.Now()) {
+		utils.SendJSONResponse(w, http.StatusBadRequest, "Please select future date and time", nil)
+		return
 	}
 
 	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer")
 	id, err := utils.GetIDFromToken(token)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(err.Error()))
+		utils.SendJSONResponse(w, http.StatusBadRequest, err.Error(), nil)
+		return
 	}
 
-	_, err = capsuleCollection.InsertOne(context.Background(),
-		bson.M{
-			"title":   c.Title,
-			"message": c.Message,
-			"status":  "locked",
-			"creator": id,
-		})
+	c.ID = primitive.NewObjectID()
+	c.Creator = id
+	c.IsOpened = false
+	c.CreatedAt = time.Now()
+	_, err = capsuleCollection.InsertOne(context.Background(), c)
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
+		utils.SendJSONResponse(w, http.StatusBadRequest, "Internal server error", nil)
+		return
 	}
 
-	w.Write([]byte("Successfully created capsule"))
+	utils.SendJSONResponse(w, http.StatusCreated, "Successfully created capsule", c)
 }
 
 func GetAllCapsules(w http.ResponseWriter, r *http.Request) {
 	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer")
 	id, err := utils.GetIDFromToken(token)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		utils.SendJSONResponse(w, http.StatusForbidden, "Unauthorized", nil)
+		return
 	}
 
 	cursor, err := capsuleCollection.Find(context.Background(), bson.M{
 		"creator": id,
 	})
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
+		utils.SendJSONResponse(w, http.StatusInternalServerError, "Internal server error", nil)
+		return
 	}
 	defer cursor.Close(context.Background())
 
@@ -73,8 +82,8 @@ func GetAllCapsules(w http.ResponseWriter, r *http.Request) {
 		var cap bson.M
 		err := cursor.Decode(&cap)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Internal server error"))
+			utils.SendJSONResponse(w, http.StatusInternalServerError, "Internal server error", nil)
+			return
 		}
 		capsule = append(capsule, cap)
 	}

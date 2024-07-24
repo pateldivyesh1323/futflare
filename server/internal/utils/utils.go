@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
+	"net/http"
 	"strings"
 )
 
@@ -23,17 +23,34 @@ func GetIDFromToken(token string) (string, error) {
 
 	sub, ok := claims["sub"].(string)
 	if !ok {
-		fmt.Println()
 		return "", errors.New("SUB CLAIM NOT FOUND OR NOT A STRING")
 	}
 
 	subParts := strings.Split(sub, "|")
 
 	if len(subParts) < 2 {
-		fmt.Println()
 		return "", errors.New("SUB CLAIM DOES NOT HAVE ID")
 	}
 	id := subParts[1]
 
 	return id, nil
+}
+
+type Response struct {
+	Message string      `json:"message"`
+	Data    interface{} `json:"data,omitempty"`
+}
+
+func SendJSONResponse(w http.ResponseWriter, status int, message string, data interface{}) {
+	response := Response{
+		Message: message,
+		Data:    data,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
 }
