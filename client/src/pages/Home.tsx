@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import { useUserAuth } from "../providers/UserAuthProvider";
 import {
     Badge,
-    Button,
     DataList,
     Flex,
     Heading,
@@ -17,23 +16,22 @@ const Home = (): React.ReactElement => {
     const { getAccessToken } = useUserAuth();
     const { user } = useUserAuth();
 
-    const handleGetToken = async () => {
+    const printToken = useCallback(async () => {
         const token = await getAccessToken();
         console.log(token);
-    };
+    }, [getAccessToken]);
+
+    useEffect(() => {
+        printToken();
+    }, [printToken]);
 
     const { data: capsules, isLoading } = useQuery({
         queryKey: ["capsules"],
         queryFn: getCapsules,
     });
 
-    console.log(capsules);
-
     return (
         <div className="w-[80%] m-auto">
-            {/* <Button color="sky" onClick={handleGetToken}>
-                Get token
-            </Button> */}
             <Heading size="6" mb="2">
                 Your Capsules
             </Heading>
