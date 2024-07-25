@@ -33,6 +33,11 @@ func CreateCapsule(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(c.ContentItems) > 10 {
+		utils.SendJSONResponse(w, http.StatusForbidden, "You can add maximum 10 participants!", nil)
+		return
+	}
+
 	if c.ScheduledOpenDate.Before(time.Now()) {
 		utils.SendJSONResponse(w, http.StatusBadRequest, "Please select future date and time", nil)
 		return
@@ -85,7 +90,17 @@ func GetAllCapsules(w http.ResponseWriter, r *http.Request) {
 			utils.SendJSONResponse(w, http.StatusInternalServerError, "Internal server error", nil)
 			return
 		}
-		capsule = append(capsule, cap)
+		filteredCap := map[string]interface{}{
+			"_id":                 cap["_id"],
+			"created_at":          cap["created_at"],
+			"creator":             cap["creator"],
+			"title":               cap["title"],
+			"description":         cap["description"],
+			"is_opened":           cap["is_opened"],
+			"participant_emails":  cap["participant_emails"],
+			"scheduled_open_date": cap["scheduled_open_date"],
+		}
+		capsule = append(capsule, filteredCap)
 	}
 
 	json.NewEncoder(w).Encode(capsule)

@@ -1,16 +1,10 @@
 import React, { useCallback, useEffect } from "react";
 import { useUserAuth } from "../providers/UserAuthProvider";
-import {
-    Badge,
-    DataList,
-    Flex,
-    Heading,
-    Separator,
-    Spinner,
-} from "@radix-ui/themes";
+import { Badge, DataList, Flex, Heading, Separator } from "@radix-ui/themes";
 import { useQuery } from "@tanstack/react-query";
 import { getCapsules } from "../queries";
 import { getIdFromSub } from "../utils";
+import Spinner from "../components/ui/spinner";
 
 const Home = (): React.ReactElement => {
     const { getAccessToken } = useUserAuth();
@@ -30,8 +24,10 @@ const Home = (): React.ReactElement => {
         queryFn: getCapsules,
     });
 
+    console.log(capsules);
+
     return (
-        <div className="w-[80%] m-auto">
+        <div className="w-[80%] m-auto mb-8">
             <Heading size="6" mb="2">
                 Your Capsules
             </Heading>
@@ -95,20 +91,48 @@ const Home = (): React.ReactElement => {
                                 </DataList.Item>
                                 <DataList.Item>
                                     <DataList.Label minWidth="88px">
+                                        Creation time
+                                    </DataList.Label>
+                                    <DataList.Value>
+                                        {new Date(
+                                            capsule.created_at
+                                        ).toLocaleString("in", {
+                                            dateStyle: "medium",
+                                            timeStyle: "short",
+                                        })}
+                                    </DataList.Value>
+                                </DataList.Item>
+                                <DataList.Item>
+                                    <DataList.Label minWidth="88px">
+                                        Scheduled open date
+                                    </DataList.Label>
+                                    <DataList.Value>
+                                        {new Date(
+                                            capsule.scheduled_open_date
+                                        ).toLocaleString("in", {
+                                            dateStyle: "medium",
+                                            timeStyle: "short",
+                                        })}
+                                    </DataList.Value>
+                                </DataList.Item>
+                                <DataList.Item>
+                                    <DataList.Label minWidth="88px">
                                         Participants
                                     </DataList.Label>
                                     <DataList.Value>
-                                        {capsule.participants_email
-                                            ? capsule?.participants_email?.map(
-                                                  (email) => {
-                                                      return (
-                                                          <span key={email}>
-                                                              {email}{" "}
-                                                          </span>
-                                                      );
-                                                  }
-                                              )
-                                            : "-"}
+                                        <Flex direction="column">
+                                            {capsule.participant_emails
+                                                ? capsule?.participant_emails?.map(
+                                                      (email) => {
+                                                          return (
+                                                              <span key={email}>
+                                                                  - {email}{" "}
+                                                              </span>
+                                                          );
+                                                      }
+                                                  )
+                                                : "-"}
+                                        </Flex>
                                     </DataList.Value>
                                 </DataList.Item>
                             </DataList.Root>
