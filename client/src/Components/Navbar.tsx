@@ -1,10 +1,23 @@
 import React from "react";
 import { useUserAuth } from "../providers/UserAuthProvider";
-import { Button, Flex } from "@radix-ui/themes";
+import { Avatar, Button, DropdownMenu, Flex } from "@radix-ui/themes";
 import { Link } from "react-router-dom";
 
 const Navbar = (): React.ReactElement => {
-    const { login, logout, isAuthenticated } = useUserAuth();
+    const { login, logout, isAuthenticated, user, isLoading } = useUserAuth();
+
+    const navLinks = [
+        {
+            name: "My capsules",
+            link: "/home",
+        },
+        {
+            name: "Create new capsule",
+            link: "/capsule/create",
+        },
+    ];
+
+    console.log(user);
 
     return (
         <Flex
@@ -16,20 +29,56 @@ const Navbar = (): React.ReactElement => {
             mb="2"
             height="80px"
             px="7"
-            className="bg-blue"
+            className="bg-blue shadow-lg"
         >
             <Link to="/" className="text-2xl text-red font-bold font-norican">
                 Futflare
             </Link>
-            {isAuthenticated ? (
-                <Button color="yellow" onClick={logout}>
-                    Logout
-                </Button>
-            ) : (
-                <Button color="yellow" onClick={login}>
-                    Signin
-                </Button>
-            )}
+            <Flex justify="center" align="center" gap="3">
+                {isAuthenticated ? (
+                    <>
+                        {navLinks.map((link) => {
+                            return (
+                                <Link
+                                    key={link.link}
+                                    to={link.link}
+                                    className="hover:underline text-sm"
+                                >
+                                    {link.name}
+                                </Link>
+                            );
+                        })}
+                        <DropdownMenu.Root>
+                            <DropdownMenu.Trigger>
+                                <button
+                                    className="IconButton"
+                                    aria-label="Customise options"
+                                >
+                                    <Avatar
+                                        radius="full"
+                                        src={user?.picture}
+                                        fallback={
+                                            user?.given_name?.charAt(0) || ""
+                                        }
+                                        size="3"
+                                        variant="solid"
+                                        color="yellow"
+                                    />
+                                </button>
+                            </DropdownMenu.Trigger>
+                            <DropdownMenu.Content>
+                                <DropdownMenu.Item onClick={logout} color="red">
+                                    Logout
+                                </DropdownMenu.Item>
+                            </DropdownMenu.Content>
+                        </DropdownMenu.Root>
+                    </>
+                ) : (
+                    <Button color="yellow" onClick={login} loading={isLoading}>
+                        Signin
+                    </Button>
+                )}
+            </Flex>
         </Flex>
     );
 };

@@ -16,4 +16,9 @@ export interface ContentItem {
     text: string;
 }
 
+export interface APIResponseType<T> {
+    message: string;
+    data: T;
+}
+
 export type CapsuleWithoutContent = Omit<Capsule, "content_items">;

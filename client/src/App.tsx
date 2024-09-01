@@ -7,6 +7,8 @@ import PrivateRoute from "./components/PrivateRoute";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect } from "react";
 import { setAuth0 } from "./lib";
+import CreateCapsule from "./pages/CreateCapsule";
+import OpenedCapsule from "./pages/OpenedCapsule";
 
 function App() {
     const auth0 = useAuth0();
@@ -25,6 +27,22 @@ function App() {
                     element={
                         <PrivateRoute>
                             <Home />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/capsule/create"
+                    element={
+                        <PrivateRoute>
+                            <CreateCapsule />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/capsule/:id"
+                    element={
+                        <PrivateRoute>
+                            <OpenedCapsule />
                         </PrivateRoute>
                     }
                 />
