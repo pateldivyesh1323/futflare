@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -72,8 +73,14 @@ func GetAllCapsules(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	authManagementToken := utils.GetAuth0ManageMentAPIToken()
+	fmt.Println("authManagementToken", authManagementToken)
+
 	cursor, err := capsuleCollection.Find(context.Background(), bson.M{
-		"creator": id,
+		"$or": []bson.M{
+			{"creator": id},
+			{"participant_emails": bson.M{"$elemMatch": bson.M{"$eq": id}}},
+		},
 	})
 	if err != nil {
 		utils.SendJSONResponse(w, http.StatusInternalServerError, "Internal server error", nil)
@@ -103,5 +110,5 @@ func GetAllCapsules(w http.ResponseWriter, r *http.Request) {
 		capsule = append(capsule, filteredCap)
 	}
 
-	json.NewEncoder(w).Encode(capsule)
+	utils.SendJSONResponse(w, http.StatusOK, "Successfully fetched capsules", capsule)
 }

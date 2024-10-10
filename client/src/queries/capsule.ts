@@ -1,5 +1,5 @@
 import { apiClient } from "../lib";
-import { APIResponseType, CapsuleWithoutContent } from "../types";
+import { CapsuleWithoutContent, APIResponseType } from "../types";
 
 export const getCapsules = async () => {
     const { data } = await apiClient.get<
@@ -9,6 +9,8 @@ export const getCapsules = async () => {
 };
 
 export const createCapsule = async () => {
-    // const { msg } = await apiClient.post<>("/api/capsule");
-    // return msg;
+    const { data } = await apiClient.post<
+        APIResponseType<CapsuleWithoutContent>
+    >("/api/capsule");
+    return data;
 };

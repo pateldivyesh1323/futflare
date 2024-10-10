@@ -13,6 +13,7 @@ var (
 	AuthDomain      string
 	AuthAudience    string
 	AuthSecret      string
+	AuthClientId    string
 )
 
 func init() {
@@ -24,4 +25,5 @@ func init() {
 	AuthDomain = os.Getenv("AUTH_DOMAIN")
 	AuthAudience = os.Getenv("AUTH_AUDIENCE")
 	AuthSecret = os.Getenv("AUTH_SECRET")
+	AuthClientId = os.Getenv("AUTH_CLIENTID")
 }

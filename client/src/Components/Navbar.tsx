@@ -17,8 +17,6 @@ const Navbar = (): React.ReactElement => {
         },
     ];
 
-    console.log(user);
-
     return (
         <Flex
             as="div"

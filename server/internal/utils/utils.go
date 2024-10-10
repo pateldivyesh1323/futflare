@@ -4,8 +4,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"strings"
+
+	"github.com/pateldivyesh1323/futflare/server/internal/config"
 )
 
 func GetIDFromToken(token string) (string, error) {
@@ -53,4 +57,23 @@ func SendJSONResponse(w http.ResponseWriter, status int, message string, data in
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
+}
+
+func GetAuth0ManageMentAPIToken() string {
+	url := "https://" + config.AuthDomain + "/oauth/token"
+
+	payload := strings.NewReader("grant_type=client_credentials&client_id=" + config.AuthClientId + "&client_secret=%7B" + config.AuthSecret + "%7D&audience=" + config.AuthAudience + "%2Fapi%2Fv2%2F")
+
+	req, _ := http.NewRequest("POST", url, payload)
+
+	req.Header.Add("content-type", "application/json")
+
+	res, _ := http.DefaultClient.Do(req)
+	body, _ := io.ReadAll(res.Body)
+
+	fmt.Println(res)
+	fmt.Println(string(body))
+
+	defer res.Body.Close()
+	return string(body)
 }

@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { setAuth0 } from "./lib";
 import CreateCapsule from "./pages/CreateCapsule";
 import OpenedCapsule from "./pages/OpenedCapsule";
+import Error from "./pages/Error";
 
 function App() {
     const auth0 = useAuth0();
@@ -46,6 +47,7 @@ function App() {
                         </PrivateRoute>
                     }
                 />
+                <Route path="/error" element={<Error />} />
             </Routes>
         </main>
     );
