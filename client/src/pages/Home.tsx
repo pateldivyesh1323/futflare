@@ -12,7 +12,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { getCapsules } from "../queries";
 import { getIdFromSub } from "../utils";
-import Spinner from "../components/ui/spinner";
+import Spinner from "../Components/ui/spinner";
 import { Link, useNavigate } from "react-router-dom";
 
 const Home = (): React.ReactElement => {

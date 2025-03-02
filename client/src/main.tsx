@@ -8,7 +8,7 @@ import { UserAuthProvider } from "./providers/UserAuthProvider.tsx";
 import { BrowserRouter } from "react-router-dom";
 import "@radix-ui/themes/styles.css";
 import { Theme } from "@radix-ui/themes";
-import { Toaster } from "./components/ui/sonner.tsx";
+import { Toaster } from "./Components/ui/sonner.tsx";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/client.ts";
 

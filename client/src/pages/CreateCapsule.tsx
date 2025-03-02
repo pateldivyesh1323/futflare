@@ -83,7 +83,10 @@ export default function CreateCapsule() {
                     <Button
                         color="yellow"
                         className="float-right!"
-                        onClick={() => handleCreateCapsule()}
+                        onClick={() => {
+                            console.log("Hello");
+                            handleCreateCapsule();
+                        }}
                     >
                         Create capsule
                     </Button>
