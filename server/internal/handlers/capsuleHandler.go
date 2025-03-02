@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -72,9 +71,6 @@ func GetAllCapsules(w http.ResponseWriter, r *http.Request) {
 		utils.SendJSONResponse(w, http.StatusForbidden, "Unauthorized", nil)
 		return
 	}
-
-	authManagementToken := utils.GetAuth0ManageMentAPIToken()
-	fmt.Println("authManagementToken", authManagementToken)
 
 	cursor, err := capsuleCollection.Find(context.Background(), bson.M{
 		"$or": []bson.M{
