@@ -12,7 +12,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { getCapsules } from "../queries";
 import { getIdFromSub } from "../utils";
-import Spinner from "../Components/ui/spinner";
+import Spinner from "../components/ui/spinner";
 import { Link, useNavigate } from "react-router-dom";
 
 const Home = (): React.ReactElement => {
@@ -43,7 +43,7 @@ const Home = (): React.ReactElement => {
     const capsules = data?.data;
 
     return (
-        <div className="w-[80%] m-auto mb-8">
+        <div className="flex items-center justify-center flex-col mt-10">
             <Heading size="6" mb="2">
                 Your Capsules
             </Heading>

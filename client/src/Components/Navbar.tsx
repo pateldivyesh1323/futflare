@@ -2,6 +2,7 @@ import React from "react";
 import { useUserAuth } from "../providers/UserAuthProvider";
 import { Avatar, Button, DropdownMenu, Flex } from "@radix-ui/themes";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 const Navbar = (): React.ReactElement => {
     const { login, logout, isAuthenticated, user, isLoading } = useUserAuth();
@@ -29,9 +30,21 @@ const Navbar = (): React.ReactElement => {
             px="7"
             className="bg-blue shadow-lg"
         >
-            <Link to="/" className="text-2xl text-red font-bold font-norican">
+            <Link
+                to="/"
+                className="text-2xl text-red-600 font-bold font-norican"
+            >
                 Futflare
             </Link>
+            <Button
+                variant="outline"
+                color="gray"
+                onClick={() => {
+                    toast.success("Hello");
+                }}
+            >
+                Hello
+            </Button>
             <Flex justify="center" align="center" gap="3">
                 {isAuthenticated ? (
                     <>

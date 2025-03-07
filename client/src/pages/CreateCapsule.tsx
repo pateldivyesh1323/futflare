@@ -25,7 +25,7 @@ export default function CreateCapsule() {
     });
 
     return (
-        <div className="w-[60%] m-auto mb-8">
+        <div className="flex flex-col items-center justify-center mt-10 w-[80%]">
             <Heading size="6" mb="2" align="center">
                 Create new capsule
             </Heading>
