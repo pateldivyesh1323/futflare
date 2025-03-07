@@ -14,6 +14,10 @@ var (
 	AuthAudience    string
 	AuthSecret      string
 	AuthClientId    string
+	AWSRegion       string
+	AWSAccessKey    string
+	AWSSecretKey    string
+	AWSS3Bucket     string
 )
 
 func init() {
@@ -26,4 +30,8 @@ func init() {
 	AuthAudience = os.Getenv("AUTH_AUDIENCE")
 	AuthSecret = os.Getenv("AUTH_SECRET")
 	AuthClientId = os.Getenv("AUTH_CLIENTID")
+	AWSRegion = os.Getenv("AWS_S3_REGION")
+	AWSAccessKey = os.Getenv("AWS_ACCESS_KEY")
+	AWSSecretKey = os.Getenv("AWS_SECRET_KEY")
+	AWSS3Bucket = os.Getenv("AWS_S3_BUCKET")
 }

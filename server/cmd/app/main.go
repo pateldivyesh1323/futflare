@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/pateldivyesh1323/futflare/server/internal/awslib"
 	"github.com/pateldivyesh1323/futflare/server/internal/database"
 	"github.com/pateldivyesh1323/futflare/server/internal/router"
 	"github.com/pateldivyesh1323/futflare/server/internal/scheduler"
@@ -17,6 +18,11 @@ var capsuleCollection = database.Database.Collection("capsule")
 func main() {
 	fmt.Println("Server fired on http://localhost:8000...")
 
+	// Initialize AWS services
+
+	awslib.Initialize(context.Background())
+
+	// Capsule opener
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -27,6 +33,7 @@ func main() {
 
 	go scheduler.UpdateCapsuleOpenStatus(ctx, capsuleCollection)
 
+	// Router
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"}, // Allow all origins
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
