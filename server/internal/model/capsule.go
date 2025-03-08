@@ -27,7 +27,23 @@ type Capsule struct {
 }
 
 type ContentItem struct {
-	Type ContentType `bson:"type"`
-	URL  string      `bson:"url"`
-	Text string      `bson:"text"`
+	Type    ContentType       `bson:"type" json:"type"`
+	Content ContentItemDetail `bson:"content" json:"content"`
+}
+
+type ContentItemDetail interface{}
+
+type MessageContent struct {
+	Text string `bson:"text" json:"text"`
+}
+
+type ImageContent struct {
+	URL     string `bson:"url" json:"url"`
+	Caption string `bson:"caption,omitempty" json:"caption,omitempty"`
+	AltText string `bson:"alt_text,omitempty" json:"alt_text,omitempty"`
+}
+
+type VideoContent struct {
+	URL     string `bson:"url" json:"url"`
+	Caption string `bson:"caption,omitempty" json:"caption,omitempty"`
 }

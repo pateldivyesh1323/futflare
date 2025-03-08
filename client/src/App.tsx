@@ -1,9 +1,9 @@
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
-import Navbar from "./Components/Navbar";
+import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Introduction from "./pages/Introduction";
-import PrivateRoute from "./Components/PrivateRoute";
+import PrivateRoute from "./components/PrivateRoute";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect } from "react";
 import { setAuth0 } from "./lib";
