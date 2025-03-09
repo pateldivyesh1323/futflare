@@ -14,6 +14,13 @@ export const getCapsules = async () => {
     return data;
 };
 
+export const getCapsule = async (id: string) => {
+    const { data } = await apiClient.get<
+        APIResponseType<CapsuleWithoutContent>
+    >(`/api/capsule/${id}`);
+    return data;
+};
+
 export const createCapsule = async (newCapsule: CreateCapsuleType) => {
     const { data } = await apiClient.post<
         APIResponseType<CapsuleWithoutContent>

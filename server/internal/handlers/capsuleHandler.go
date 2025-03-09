@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/pateldivyesh1323/futflare/server/internal/awslib"
@@ -18,6 +19,7 @@ import (
 	"github.com/pateldivyesh1323/futflare/server/internal/config"
 	"github.com/pateldivyesh1323/futflare/server/internal/database"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var capsuleCollection = database.Database.Collection("capsule")
@@ -225,4 +227,63 @@ func GetAllCapsules(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SendJSONResponse(w, http.StatusOK, "Successfully fetched capsules", capsule)
+}
+
+func GetCapsule(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["id"]
+
+	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer")
+	userID, err := utils.GetIDFromToken(token)
+	if err != nil {
+		utils.SendJSONResponse(w, http.StatusForbidden, "Unauthorized", nil)
+		return
+	}
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		utils.SendJSONResponse(w, http.StatusBadRequest, "Invalid capsule ID", nil)
+		return
+	}
+
+	var capsule bson.M
+	err = capsuleCollection.FindOne(context.Background(), bson.M{
+		"_id": objectID,
+		"$or": []bson.M{
+			{"creator": userID},
+			{"participant_emails": bson.M{"$elemMatch": bson.M{"$eq": userID}}},
+		},
+	}).Decode(&capsule)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			utils.SendJSONResponse(w, http.StatusNotFound, "Capsule not found", nil)
+		} else {
+			utils.SendJSONResponse(w, http.StatusInternalServerError, "Internal server error", nil)
+		}
+		return
+	}
+
+	isOpened, ok := capsule["is_opened"].(bool)
+	if !ok {
+		utils.SendJSONResponse(w, http.StatusInternalServerError, "Internal server error", nil)
+		return
+	}
+
+	response := map[string]interface{}{
+		"_id":                 capsule["_id"],
+		"created_at":          capsule["created_at"],
+		"creator":             capsule["creator"],
+		"title":               capsule["title"],
+		"description":         capsule["description"],
+		"is_opened":           capsule["is_opened"],
+		"participant_emails":  capsule["participant_emails"],
+		"scheduled_open_date": capsule["scheduled_open_date"],
+	}
+
+	if isOpened {
+		response["content_items"] = capsule["content_items"]
+	}
+
+	utils.SendJSONResponse(w, http.StatusOK, "Successfully fetched capsule", response)
 }

@@ -76,13 +76,13 @@ const Home = (): React.ReactElement => {
                     ))}
                 </div>
             ) : (
-                <div className="grid gap-6">
+                <div className="grid gap-4">
                     {capsules && capsules.length > 0 ? (
                         capsules.map((capsule) => (
                             <Card
                                 key={capsule._id}
                                 className={`
-                                    border-l-4 transition-all shadow-md hover:shadow-lg
+                                    border-l-4 transition-all shadow-sm hover:shadow-md
                                     ${
                                         capsule.is_opened
                                             ? "border-l-green-500"
@@ -90,9 +90,9 @@ const Home = (): React.ReactElement => {
                                     }
                                 `}
                             >
-                                <CardHeader className="pb-2">
+                                <CardHeader className="pb-0 pt-2 px-3">
                                     <div className="flex items-center justify-between">
-                                        <CardTitle className="text-xl">
+                                        <CardTitle className="text-base">
                                             {capsule.title}
                                         </CardTitle>
                                         <Badge
@@ -105,7 +105,7 @@ const Home = (): React.ReactElement => {
                                                 capsule.is_opened
                                                     ? "bg-green-100 text-green-800"
                                                     : "bg-amber-100 text-amber-800"
-                                            }`}
+                                            } text-xs`}
                                         >
                                             {capsule.is_opened ? (
                                                 <span className="flex items-center gap-1">
@@ -120,19 +120,19 @@ const Home = (): React.ReactElement => {
                                             )}
                                         </Badge>
                                     </div>
-                                    <CardDescription className="line-clamp-2">
+                                    <CardDescription className="line-clamp-1 text-xs mt-0.5">
                                         {capsule.description}
                                     </CardDescription>
                                 </CardHeader>
 
-                                <CardContent className="pb-2">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                                        <div className="flex items-center gap-2">
-                                            <User className="h-4 w-4 text-muted-foreground" />
+                                <CardContent className="px-3">
+                                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+                                        <div className="flex items-center gap-1">
+                                            <User className="h-3 w-3 text-muted-foreground" />
                                             <span className="text-muted-foreground">
                                                 Owner:
                                             </span>
-                                            <span className="ml-1 font-medium">
+                                            <span className="ml-0.5 font-medium">
                                                 {capsule.creator ===
                                                 getIdFromSub(user?.sub || "")
                                                     ? "Yes"
@@ -140,12 +140,12 @@ const Home = (): React.ReactElement => {
                                             </span>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
-                                            <Clock className="h-4 w-4 text-muted-foreground" />
+                                        <div className="flex items-center gap-1">
+                                            <Clock className="h-3 w-3 text-muted-foreground" />
                                             <span className="text-muted-foreground">
                                                 Created:
                                             </span>
-                                            <span className="ml-1 font-medium">
+                                            <span className="ml-0.5 font-medium">
                                                 {new Date(
                                                     capsule.created_at
                                                 ).toLocaleString("in", {
@@ -155,12 +155,12 @@ const Home = (): React.ReactElement => {
                                             </span>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
-                                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <div className="flex items-center gap-1">
+                                            <Calendar className="h-3 w-3 text-muted-foreground" />
                                             <span className="text-muted-foreground">
                                                 Opens:
                                             </span>
-                                            <span className="ml-1 font-medium">
+                                            <span className="ml-0.5 font-medium">
                                                 {new Date(
                                                     capsule.scheduled_open_date
                                                 ).toLocaleString("in", {
@@ -170,12 +170,12 @@ const Home = (): React.ReactElement => {
                                             </span>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
-                                            <Users className="h-4 w-4 text-muted-foreground" />
+                                        <div className="flex items-center gap-1">
+                                            <Users className="h-3 w-3 text-muted-foreground" />
                                             <span className="text-muted-foreground">
                                                 Participants:
                                             </span>
-                                            <span className="ml-1 font-medium">
+                                            <span className="ml-0.5 font-medium">
                                                 {capsule.participant_emails
                                                     ? capsule.participant_emails
                                                           .length
@@ -187,16 +187,16 @@ const Home = (): React.ReactElement => {
                                     {capsule.participant_emails &&
                                         capsule.participant_emails.length >
                                             0 && (
-                                            <div className="mt-4 p-3 bg-slate-50 rounded-md text-sm">
-                                                <p className="text-muted-foreground mb-1 font-medium">
+                                            <div className="bg-slate-50 rounded-md text-xs">
+                                                <p className="text-muted-foreground font-medium text-xs">
                                                     Participants:
                                                 </p>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
+                                                <div className="grid grid-cols-2 gap-0.5">
                                                     {capsule.participant_emails.map(
                                                         (email) => (
                                                             <span
                                                                 key={email}
-                                                                className="text-slate-600"
+                                                                className="text-slate-600 text-xs truncate"
                                                             >
                                                                 • {email}
                                                             </span>
@@ -208,10 +208,29 @@ const Home = (): React.ReactElement => {
                                 </CardContent>
 
                                 {capsule.is_opened && (
-                                    <CardFooter className="pt-2 justify-end">
-                                        <Link to={`/capsule/${capsule._id}`}>
-                                            <Button variant="outline">
-                                                View Capsule
+                                    <CardFooter className="pt-0 pb-2 px-3 justify-end">
+                                        <Link
+                                            to={`/capsule/${capsule._id}`}
+                                            className="w-full sm:w-auto"
+                                        >
+                                            <Button
+                                                variant="default"
+                                                className="w-full sm:w-auto gap-1 bg-green-600 hover:bg-green-700 transition-colors text-xs py-0.5 h-7"
+                                            >
+                                                <span>View Capsule</span>
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="12"
+                                                    height="12"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                >
+                                                    <path d="m9 18 6-6-6-6" />
+                                                </svg>
                                             </Button>
                                         </Link>
                                     </CardFooter>
@@ -219,17 +238,22 @@ const Home = (): React.ReactElement => {
                             </Card>
                         ))
                     ) : (
-                        <Card className="border-dashed border-2 p-8">
+                        <Card className="border-dashed border-2 p-4">
                             <div className="text-center">
-                                <h3 className="text-lg font-medium mb-2">
+                                <h3 className="text-sm font-medium mb-1">
                                     No Time Capsules Found
                                 </h3>
-                                <p className="text-muted-foreground mb-4">
+                                <p className="text-muted-foreground mb-2 text-xs">
                                     You haven't created any time capsules yet.
                                     Start preserving your memories today!
                                 </p>
                                 <Link to="/create">
-                                    <Button>Create Your First Capsule</Button>
+                                    <Button
+                                        size="sm"
+                                        className="h-7 text-xs py-0.5"
+                                    >
+                                        Create Your First Capsule
+                                    </Button>
                                 </Link>
                             </div>
                         </Card>
