@@ -24,7 +24,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                 }}
             >
                 <QueryClientProvider client={queryClient}>
-                    <Theme accentColor="sky">
+                    <Theme>
                         <UserAuthProvider>
                             <Toaster />
                             <App />

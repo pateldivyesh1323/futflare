@@ -1,6 +1,8 @@
 package model
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -46,4 +48,46 @@ type ImageContent struct {
 type VideoContent struct {
 	URL     string `bson:"url" json:"url"`
 	Caption string `bson:"caption,omitempty" json:"caption,omitempty"`
+}
+
+func (ci *ContentItem) UnmarshalJSON(data []byte) error {
+	temp := struct {
+		Type    ContentType     `json:"type"`
+		Content json.RawMessage `json:"content"`
+	}{}
+
+	if err := json.Unmarshal(data, &temp); err != nil {
+		return err
+	}
+
+	ci.Type = temp.Type
+
+	var err error
+	switch ci.Type {
+	case ContentTypeMessage:
+		var msgContent MessageContent
+		if err = json.Unmarshal(temp.Content, &msgContent); err != nil {
+			return fmt.Errorf("invalid message content: %w", err)
+		}
+		ci.Content = msgContent
+
+	case ContentTypeImage:
+		var imgContent ImageContent
+		if err = json.Unmarshal(temp.Content, &imgContent); err != nil {
+			return fmt.Errorf("invalid image content: %w", err)
+		}
+		ci.Content = imgContent
+
+	case ContentTypeVideo:
+		var vidContent VideoContent
+		if err = json.Unmarshal(temp.Content, &vidContent); err != nil {
+			return fmt.Errorf("invalid video content: %w", err)
+		}
+		ci.Content = vidContent
+
+	default:
+		return fmt.Errorf("unknown content type: %s", ci.Type)
+	}
+
+	return nil
 }

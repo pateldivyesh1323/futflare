@@ -31,6 +31,8 @@ import {
 import { format } from "date-fns";
 import { ContentItem, ImageContent, VideoContent } from "@/types";
 import { toast } from "sonner";
+import { CREATE_CAPSULE } from "@/constants";
+import { AxiosError } from "axios";
 
 export default function CreateCapsule() {
     const [newCapsule, setNewCapsule] = useState<CreateCapsuleType>({
@@ -97,9 +99,6 @@ export default function CreateCapsule() {
                     content_type: currentTab,
                     file_name: selectedFile.name,
                 });
-
-                console.log("Data::", data);
-
                 const uploadResponse = await fetch(data.presigned_url, {
                     method: "PUT",
                     headers: {
@@ -134,7 +133,6 @@ export default function CreateCapsule() {
                 setCaption("");
                 setAltText("");
             } catch (error) {
-                console.error("Error uploading file:", error);
                 toast.error("Error uploading file");
                 setUploading(false);
                 return;
@@ -157,14 +155,21 @@ export default function CreateCapsule() {
     };
 
     const { mutate: createCapsuleMutation } = useMutation({
-        mutationKey: ["createCapsule"],
+        mutationKey: [CREATE_CAPSULE],
         mutationFn: () => createCapsule(newCapsule),
-        onSettled: (data) => {
-            console.log(data);
+        onSuccess: () => {
+            toast.success("Capsule created successfully");
+        },
+        onError: (error: AxiosError<{ message: string }>) => {
+            toast.error(
+                error?.response?.data?.message ||
+                    "Something went wrong while creating capsule"
+            );
         },
     });
 
-    const handleCreateCapsule = () => {
+    const handleCreateCapsule = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
         createCapsuleMutation();
     };
 
@@ -187,7 +192,10 @@ export default function CreateCapsule() {
                 capsule.
             </p>
 
-            <Form.Root className="w-full space-y-8">
+            <Form.Root
+                className="w-full space-y-8"
+                onSubmit={handleCreateCapsule}
+            >
                 <Form.Field className="grid" name="title">
                     <div className="flex items-baseline justify-between mb-2">
                         <Form.Label className="text-[15px] font-semibold text-slate-700 flex items-center gap-2">
@@ -585,7 +593,6 @@ export default function CreateCapsule() {
                                 ? "bg-slate-300"
                                 : "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 hover:shadow-xl"
                         }`}
-                        onClick={handleCreateCapsule}
                         disabled={
                             !newCapsule.title ||
                             !newCapsule.description ||

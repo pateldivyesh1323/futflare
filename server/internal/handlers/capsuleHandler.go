@@ -119,36 +119,42 @@ func CreateCapsule(w http.ResponseWriter, r *http.Request) {
 
 	for _, item := range c.ContentItems {
 		switch item.Type {
-		case model.ContentTypeImage:
-			if img, ok := item.Content.(model.ImageContent); ok {
-				if img.URL == "" {
-					utils.SendJSONResponse(w, http.StatusBadRequest, "Image URL cannot be empty", nil)
-					return
-				}
-			} else {
-				utils.SendJSONResponse(w, http.StatusBadRequest, "Invalid image content format", nil)
-				return
-			}
-		case model.ContentTypeVideo:
-			if vid, ok := item.Content.(model.VideoContent); ok {
-				if vid.URL == "" {
-					utils.SendJSONResponse(w, http.StatusBadRequest, "Video URL cannot be empty", nil)
-					return
-				}
-			} else {
-				utils.SendJSONResponse(w, http.StatusBadRequest, "Invalid video content format", nil)
-				return
-			}
 		case model.ContentTypeMessage:
-			if msg, ok := item.Content.(model.MessageContent); ok {
-				if msg.Text == "" {
-					utils.SendJSONResponse(w, http.StatusBadRequest, "Message text cannot be empty", nil)
-					return
-				}
-			} else {
+			msgContent, ok := item.Content.(model.MessageContent)
+			if !ok {
 				utils.SendJSONResponse(w, http.StatusBadRequest, "Invalid message content format", nil)
 				return
 			}
+
+			if msgContent.Text == "" {
+				utils.SendJSONResponse(w, http.StatusBadRequest, "Message text cannot be empty", nil)
+				return
+			}
+
+		case model.ContentTypeImage:
+			imgContent, ok := item.Content.(model.ImageContent)
+			if !ok {
+				utils.SendJSONResponse(w, http.StatusBadRequest, "Invalid image content format", nil)
+				return
+			}
+
+			if imgContent.URL == "" {
+				utils.SendJSONResponse(w, http.StatusBadRequest, "Image URL cannot be empty", nil)
+				return
+			}
+
+		case model.ContentTypeVideo:
+			vidContent, ok := item.Content.(model.VideoContent)
+			if !ok {
+				utils.SendJSONResponse(w, http.StatusBadRequest, "Invalid video content format", nil)
+				return
+			}
+
+			if vidContent.URL == "" {
+				utils.SendJSONResponse(w, http.StatusBadRequest, "Video URL cannot be empty", nil)
+				return
+			}
+
 		default:
 			utils.SendJSONResponse(w, http.StatusBadRequest, "Invalid content type", nil)
 			return
@@ -173,7 +179,7 @@ func CreateCapsule(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.SendJSONResponse(w, http.StatusCreated, "Successfully created capsule", c)
+	utils.SendJSONResponse(w, http.StatusCreated, "Successfully created capsule", nil)
 }
 
 func GetAllCapsules(w http.ResponseWriter, r *http.Request) {
