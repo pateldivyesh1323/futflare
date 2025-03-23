@@ -33,7 +33,6 @@ const Navbar = (): React.ReactElement => {
     return (
         <div className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
             <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-                {/* Logo */}
                 <Link
                     to="/"
                     className="flex items-center gap-2 text-xl font-bold text-indigo-600"
@@ -44,11 +43,9 @@ const Navbar = (): React.ReactElement => {
                     </span>
                 </Link>
 
-                {/* Navigation Links and User Menu */}
                 <div className="flex items-center gap-4">
                     {isAuthenticated ? (
                         <>
-                            {/* Navigation Links */}
                             <nav className="hidden space-x-4 md:flex">
                                 {navLinks.map((link) => (
                                     <Link
@@ -118,7 +115,6 @@ const Navbar = (): React.ReactElement => {
                                 </DropdownMenuContent>
                             </DropdownMenu>
 
-                            {/* Mobile Menu Button (Shown only on mobile) */}
                             <Button
                                 variant="ghost"
                                 size="icon"

@@ -37,8 +37,6 @@ export default function OpenedCapsule() {
     const createdDate = new Date(capsule.created_at);
     const scheduledDate = new Date(capsule.scheduled_open_date);
 
-    console.log("Capsule data", capsule);
-
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl">
             <div className="bg-white rounded-lg shadow-md p-6 mb-8">

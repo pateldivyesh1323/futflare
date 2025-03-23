@@ -27,14 +27,18 @@ import {
     GiftIcon,
     Upload,
     Star,
+    Users,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ContentItem, ImageContent, VideoContent } from "@/types";
 import { toast } from "sonner";
 import { CREATE_CAPSULE } from "@/constants";
 import { AxiosError } from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function CreateCapsule() {
+    const navigate = useNavigate();
+
     const [newCapsule, setNewCapsule] = useState<CreateCapsuleType>({
         title: "",
         description: "",
@@ -50,6 +54,7 @@ export default function CreateCapsule() {
     const [caption, setCaption] = useState("");
     const [altText, setAltText] = useState("");
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [participantEmail, setParticipantEmail] = useState("");
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -154,11 +159,23 @@ export default function CreateCapsule() {
         }));
     };
 
+    const resetForm = () => {
+        setNewCapsule({
+            title: "",
+            description: "",
+            scheduled_open_date: new Date(),
+            participant_emails: [],
+            content_items: [],
+        });
+    };
+
     const { mutate: createCapsuleMutation } = useMutation({
         mutationKey: [CREATE_CAPSULE],
         mutationFn: () => createCapsule(newCapsule),
         onSuccess: () => {
             toast.success("Capsule created successfully");
+            resetForm();
+            navigate(`/home`);
         },
         onError: (error: AxiosError<{ message: string }>) => {
             toast.error(
@@ -171,6 +188,36 @@ export default function CreateCapsule() {
     const handleCreateCapsule = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         createCapsuleMutation();
+    };
+
+    const isEmailValid = (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return email.trim() === "" || emailRegex.test(email);
+    };
+
+    const handleAddParticipant = () => {
+        if (!participantEmail.trim() || !isEmailValid(participantEmail)) return;
+        if (newCapsule.participant_emails.length >= 10) return;
+        if (newCapsule.participant_emails.includes(participantEmail.trim()))
+            return;
+
+        setNewCapsule((prev) => ({
+            ...prev,
+            participant_emails: [
+                ...prev.participant_emails,
+                participantEmail.trim(),
+            ],
+        }));
+        setParticipantEmail("");
+    };
+
+    const removeParticipant = (index: number) => {
+        setNewCapsule((prev) => ({
+            ...prev,
+            participant_emails: prev.participant_emails.filter(
+                (_, i) => i !== index
+            ),
+        }));
     };
 
     return (
@@ -292,6 +339,88 @@ export default function CreateCapsule() {
                 <div className="space-y-4 pt-4">
                     <div className="flex justify-between items-center">
                         <Label className="text-[15px] font-semibold text-slate-700 flex items-center gap-2">
+                            <Users className="h-4 w-4 text-violet-500" />
+                            Participants
+                        </Label>
+                        <span className="text-sm bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">
+                            {newCapsule.participant_emails.length}/10
+                            participants
+                        </span>
+                    </div>
+
+                    <div className="flex gap-2">
+                        <Input
+                            type="email"
+                            id="participantEmail"
+                            placeholder="Enter email address"
+                            className="border-slate-200 rounded-lg"
+                            value={participantEmail}
+                            onChange={(e) =>
+                                setParticipantEmail(e.target.value)
+                            }
+                        />
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="shrink-0 border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300"
+                            onClick={handleAddParticipant}
+                            disabled={
+                                !participantEmail.trim() ||
+                                !isEmailValid(participantEmail) ||
+                                newCapsule.participant_emails.length >= 10 ||
+                                newCapsule.participant_emails.includes(
+                                    participantEmail.trim()
+                                )
+                            }
+                        >
+                            <PlusCircle className="h-4 w-4 mr-2" />
+                            Add
+                        </Button>
+                    </div>
+
+                    {!isEmailValid(participantEmail) &&
+                        participantEmail.trim() !== "" && (
+                            <p className="text-sm text-rose-500 mt-1">
+                                Please enter a valid email address
+                            </p>
+                        )}
+
+                    {newCapsule.participant_emails.length > 0 && (
+                        <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 mt-2">
+                            <div className="text-sm text-slate-500 mb-2 font-medium">
+                                Participants:
+                            </div>
+                            <div className="space-y-2">
+                                {newCapsule.participant_emails.map(
+                                    (email, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center justify-between bg-white p-2 rounded-md border border-slate-200"
+                                        >
+                                            <span className="text-sm text-slate-700 truncate">
+                                                {email}
+                                            </span>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() =>
+                                                    removeParticipant(index)
+                                                }
+                                                className="h-6 w-6 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-full"
+                                            >
+                                                <X className="h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                    )
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="space-y-4 pt-4">
+                    <div className="flex justify-between items-center">
+                        <Label className="text-[15px] font-semibold text-slate-700 flex items-center gap-2">
                             <PlusCircle className="h-4 w-4 text-emerald-500" />
                             Content Items
                         </Label>
@@ -305,67 +434,100 @@ export default function CreateCapsule() {
                             {newCapsule.content_items.map((item, index) => (
                                 <div
                                     key={index}
-                                    className="flex items-center justify-between bg-white border border-slate-200 p-4 rounded-lg shadow-sm  transition-shadow duration-200"
+                                    className="bg-white border border-slate-200 rounded-lg p-4"
                                 >
-                                    <div className="flex items-center">
-                                        <div
-                                            className={`p-2 rounded-full mr-3 ${
-                                                item.type === "message"
-                                                    ? "bg-blue-100 text-blue-600"
-                                                    : item.type === "image"
-                                                    ? "bg-emerald-100 text-emerald-600"
-                                                    : "bg-amber-100 text-amber-600"
-                                            }`}
-                                        >
-                                            {item.type === "message" && (
-                                                <MessageSquare className="h-4 w-4" />
-                                            )}
-                                            {item.type === "image" && (
-                                                <Image className="h-4 w-4" />
-                                            )}
-                                            {item.type === "video" && (
-                                                <Video className="h-4 w-4" />
-                                            )}
-                                        </div>
-                                        <span className="truncate max-w-xs text-slate-700 font-medium">
-                                            {item.type === "message"
-                                                ? (
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center">
+                                            <div
+                                                className={`p-2 rounded-full mr-3 ${
+                                                    item.type === "message"
+                                                        ? "bg-blue-100 text-blue-600"
+                                                        : item.type === "image"
+                                                        ? "bg-emerald-100 text-emerald-600"
+                                                        : "bg-amber-100 text-amber-600"
+                                                }`}
+                                            >
+                                                {item.type === "message" && (
+                                                    <MessageSquare className="h-4 w-4" />
+                                                )}
+                                                {item.type === "image" && (
+                                                    <Image className="h-4 w-4" />
+                                                )}
+                                                {item.type === "video" && (
+                                                    <Video className="h-4 w-4" />
+                                                )}
+                                            </div>
+                                            <span className="truncate max-w-xs text-slate-700 font-medium">
+                                                {item.type === "message"
+                                                    ? (
+                                                          (
+                                                              item.content as MessageContent
+                                                          ).text || ""
+                                                      ).substring(0, 30) +
+                                                      ((
+                                                          item.content as MessageContent
+                                                      ).text &&
                                                       (
                                                           item.content as MessageContent
-                                                      ).text || ""
-                                                  ).substring(0, 30) +
-                                                  ((
-                                                      item.content as MessageContent
-                                                  ).text &&
-                                                  (
-                                                      item.content as MessageContent
-                                                  ).text!.length > 30
-                                                      ? "..."
-                                                      : "")
-                                                : (item.type === "image"
-                                                      ? (
-                                                            item.content as ImageContent
-                                                        ).caption
-                                                      : (
-                                                            item.content as VideoContent
-                                                        ).caption) ||
-                                                  "Untitled"}
-                                        </span>
+                                                      ).text.length > 30
+                                                          ? "..."
+                                                          : "")
+                                                    : item.type === "image"
+                                                    ? (
+                                                          item.content as ImageContent
+                                                      ).caption || "Untitled"
+                                                    : (
+                                                          item.content as VideoContent
+                                                      ).caption || "Untitled"}
+                                            </span>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() =>
+                                                removeContentItem(index)
+                                            }
+                                            className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-full"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
                                     </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => removeContentItem(index)}
-                                        className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-full"
-                                    >
-                                        <X className="h-4 w-4" />
-                                    </Button>
+                                    {item.type === "image" && (
+                                        <img
+                                            src={
+                                                (item.content as ImageContent)
+                                                    .url
+                                            }
+                                            alt={
+                                                (item.content as ImageContent)
+                                                    .alt_text || "Image preview"
+                                            }
+                                            className="mt-2 max-h-48 w-auto object-cover rounded"
+                                        />
+                                    )}
+                                    {item.type === "video" && (
+                                        <video
+                                            controls
+                                            className="mt-2 max-h-48 w-auto rounded"
+                                        >
+                                            <source
+                                                src={
+                                                    (
+                                                        item.content as VideoContent
+                                                    ).url
+                                                }
+                                                type="video/mp4"
+                                            />
+                                            Your browser does not support the
+                                            video tag.
+                                        </video>
+                                    )}
                                 </div>
                             ))}
                         </div>
                     )}
 
-                    <Card className="overflow-hidden border-slate-200 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200">
+                    <Card className="overflow-hidden border-slate-100 rounded-xl">
                         <CardContent className="p-6">
                             <Tabs
                                 defaultValue="message"

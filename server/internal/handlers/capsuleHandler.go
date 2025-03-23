@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/pateldivyesh1323/futflare/server/internal/awslib"
 	"github.com/pateldivyesh1323/futflare/server/internal/model"
@@ -43,7 +44,7 @@ type PresignedURLResponse struct {
 
 func GeneratePresignedURL(w http.ResponseWriter, r *http.Request) {
 	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer")
-	_, err := utils.GetIDFromToken(token)
+	_, _, err := utils.GetIDFromToken(token)
 	if err != nil {
 		utils.SendJSONResponse(w, http.StatusUnauthorized, err.Error(), nil)
 		return
@@ -163,8 +164,20 @@ func CreateCapsule(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if len(c.ParticipantEmails) > 10 {
+		utils.SendJSONResponse(w, http.StatusForbidden, "You can add maximum 10 participants!", nil)
+		return
+	}
+
+	for _, email := range c.ParticipantEmails {
+		if !utils.IsEmailValid(email) {
+			utils.SendJSONResponse(w, http.StatusBadRequest, "Invalid email", nil)
+			return
+		}
+	}
+
 	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer")
-	id, err := utils.GetIDFromToken(token)
+	id, _, err := utils.GetIDFromToken(token)
 	if err != nil {
 		utils.SendJSONResponse(w, http.StatusBadRequest, err.Error(), nil)
 		return
@@ -186,18 +199,31 @@ func CreateCapsule(w http.ResponseWriter, r *http.Request) {
 
 func GetAllCapsules(w http.ResponseWriter, r *http.Request) {
 	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer")
-	id, err := utils.GetIDFromToken(token)
+	id, fullId, err := utils.GetIDFromToken(token)
 	if err != nil {
 		utils.SendJSONResponse(w, http.StatusForbidden, "Unauthorized", nil)
 		return
 	}
 
+	userDetails, err := getUserById(fullId)
+
+	if err != nil {
+		utils.SendJSONResponse(w, http.StatusInternalServerError, "Internal server error", nil)
+		return
+	}
+
+	sortParam := r.URL.Query().Get("sortBy")
+	sortOrder := -1
+	if sortParam == "oldest" {
+		sortOrder = 1
+	}
+	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: sortOrder}})
 	cursor, err := capsuleCollection.Find(context.Background(), bson.M{
 		"$or": []bson.M{
 			{"creator": id},
-			{"participant_emails": bson.M{"$elemMatch": bson.M{"$eq": id}}},
+			{"participant_emails": bson.M{"$elemMatch": bson.M{"$eq": userDetails.Email}}},
 		},
-	})
+	}, opts)
 	if err != nil {
 		utils.SendJSONResponse(w, http.StatusInternalServerError, "Internal server error", nil)
 		return
@@ -234,9 +260,16 @@ func GetCapsule(w http.ResponseWriter, r *http.Request) {
 	id := params["id"]
 
 	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer")
-	userID, err := utils.GetIDFromToken(token)
+	userID, fullId, err := utils.GetIDFromToken(token)
 	if err != nil {
 		utils.SendJSONResponse(w, http.StatusForbidden, "Unauthorized", nil)
+		return
+	}
+
+	userDetails, err := getUserById(fullId)
+
+	if err != nil {
+		utils.SendJSONResponse(w, http.StatusInternalServerError, "Internal server error", nil)
 		return
 	}
 
@@ -251,7 +284,7 @@ func GetCapsule(w http.ResponseWriter, r *http.Request) {
 		"_id": objectID,
 		"$or": []bson.M{
 			{"creator": userID},
-			{"participant_emails": bson.M{"$elemMatch": bson.M{"$eq": userID}}},
+			{"participant_emails": bson.M{"$elemMatch": bson.M{"$eq": userDetails.Email}}},
 		},
 	}).Decode(&capsule)
 

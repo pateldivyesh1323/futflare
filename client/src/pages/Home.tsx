@@ -1,11 +1,9 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useUserAuth } from "../providers/UserAuthProvider";
 import { useQuery } from "@tanstack/react-query";
 import { getCapsules } from "../queries";
 import { getIdFromSub } from "../utils";
 import { Link, useNavigate } from "react-router-dom";
-
-// Import shadcn components
 import {
     Card,
     CardContent,
@@ -16,9 +14,25 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Clock, Lock, Unlock, User, Calendar, Users } from "lucide-react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const Home = (): React.ReactElement => {
     const { getAccessToken, user } = useUserAuth();
@@ -33,9 +47,13 @@ const Home = (): React.ReactElement => {
         printToken();
     }, [printToken]);
 
+    const [sortBy, setSortBy] = useState("latest");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+
     const { data, isLoading, error } = useQuery({
-        queryKey: ["capsules"],
-        queryFn: getCapsules,
+        queryKey: ["capsules", sortBy],
+        queryFn: () => getCapsules({ sortBy }),
     });
 
     useEffect(() => {
@@ -46,43 +64,147 @@ const Home = (): React.ReactElement => {
 
     const capsules = data?.data;
 
+    // Calculate pagination values
+    const totalItems = capsules?.length || 0;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    // Get current page items
+    const currentItems = capsules?.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    // Handle page changes
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+        // Scroll to top of the list
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    // Previous page handler
+    const goToPreviousPage = () => {
+        if (currentPage > 1) {
+            handlePageChange(currentPage - 1);
+        }
+    };
+
+    // Next page handler
+    const goToNextPage = () => {
+        if (currentPage < totalPages) {
+            handlePageChange(currentPage + 1);
+        }
+    };
+
+    // Handle items per page change
+    const handleItemsPerPageChange = (value: string) => {
+        setItemsPerPage(parseInt(value));
+        setCurrentPage(1); // Reset to first page when changing items per page
+    };
+
     return (
         <div className="container mx-auto py-10 px-4 max-w-4xl">
-            <div className="text-center mb-10">
+            <div className="text-center mb-4">
                 <h1 className="text-3xl font-bold tracking-tight mb-2">
                     Your Time Capsules
                 </h1>
                 <p className="text-muted-foreground">
                     Preserve memories to revisit in the future
                 </p>
-                <Separator className="my-6" />
             </div>
 
             {isLoading ? (
                 <div className="space-y-4">
                     {[1, 2, 3].map((i) => (
-                        <Card key={i} className="w-full">
-                            <CardHeader>
-                                <Skeleton className="h-8 w-40" />
+                        <Card
+                            key={i}
+                            className="border-l-4 border-l-gray-300 transition-all shadow-sm pb-4"
+                        >
+                            <CardHeader className="pb-0 pt-2 px-3">
+                                <div className="flex items-center justify-between">
+                                    <Skeleton className="h-5 w-40" />
+                                    <Skeleton className="h-5 w-24 rounded-full" />
+                                </div>
+                                <Skeleton className="h-3 w-3/4 mt-0.5" />
                             </CardHeader>
-                            <CardContent>
-                                <div className="space-y-3">
-                                    <Skeleton className="h-4 w-full" />
-                                    <Skeleton className="h-4 w-3/4" />
-                                    <Skeleton className="h-4 w-1/2" />
+
+                            <CardContent className="px-3">
+                                <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+                                    <div className="flex items-center gap-1">
+                                        <Skeleton className="h-3 w-3 rounded-full" />
+                                        <Skeleton className="h-3 w-16" />
+                                        <Skeleton className="h-3 w-8 ml-0.5" />
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Skeleton className="h-3 w-3 rounded-full" />
+                                        <Skeleton className="h-3 w-16" />
+                                        <Skeleton className="h-3 w-20 ml-0.5" />
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Skeleton className="h-3 w-3 rounded-full" />
+                                        <Skeleton className="h-3 w-16" />
+                                        <Skeleton className="h-3 w-20 ml-0.5" />
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Skeleton className="h-3 w-3 rounded-full" />
+                                        <Skeleton className="h-3 w-16" />
+                                        <Skeleton className="h-3 w-8 ml-0.5" />
+                                    </div>
+                                </div>
+
+                                <div className="bg-slate-50 rounded-md p-2">
+                                    <Skeleton className="h-3 w-24 mb-1" />
+                                    <div className="grid grid-cols-2 gap-0.5">
+                                        <Skeleton className="h-3 w-32" />
+                                        <Skeleton className="h-3 w-28" />
+                                        <Skeleton className="h-3 w-24" />
+                                        <Skeleton className="h-3 w-32" />
+                                    </div>
                                 </div>
                             </CardContent>
+
+                            <CardFooter className="justify-end px-3">
+                                <Skeleton className="h-7 w-28 rounded-md" />
+                            </CardFooter>
                         </Card>
                     ))}
                 </div>
             ) : (
                 <div className="grid gap-4">
-                    {capsules && capsules.length > 0 ? (
-                        capsules.map((capsule) => (
+                    {!isLoading && capsules && capsules.length > 0 && (
+                        <div className="flex justify-end">
+                            <Label
+                                htmlFor="sortBy"
+                                className="mr-2 text-xs text-slate-600"
+                            >
+                                Sort by:
+                            </Label>
+                            <Select
+                                onValueChange={(value) => setSortBy(value)}
+                                value={sortBy}
+                            >
+                                <SelectTrigger
+                                    id="sortBy"
+                                    className="w-[150px]"
+                                >
+                                    <SelectValue placeholder="Select sort" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="latest">
+                                        Latest
+                                    </SelectItem>
+                                    <SelectItem value="oldest">
+                                        Oldest
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+                    {currentItems && currentItems.length > 0 ? (
+                        currentItems.map((capsule) => (
                             <Card
                                 key={capsule._id}
                                 className={`
-                                    border-l-4 transition-all shadow-sm hover:shadow-md
+                                    border-l-4 transition-all shadow-sm hover:shadow-md pb-4
                                     ${
                                         capsule.is_opened
                                             ? "border-l-green-500"
@@ -187,7 +309,7 @@ const Home = (): React.ReactElement => {
                                     {capsule.participant_emails &&
                                         capsule.participant_emails.length >
                                             0 && (
-                                            <div className="bg-slate-50 rounded-md text-xs">
+                                            <div className="bg-slate-50 rounded-md text-xs p-2 my-2">
                                                 <p className="text-muted-foreground font-medium text-xs">
                                                     Participants:
                                                 </p>
@@ -208,7 +330,7 @@ const Home = (): React.ReactElement => {
                                 </CardContent>
 
                                 {capsule.is_opened && (
-                                    <CardFooter className="pt-0 pb-2 px-3 justify-end">
+                                    <CardFooter className="justify-end">
                                         <Link
                                             to={`/capsule/${capsule._id}`}
                                             className="w-full sm:w-auto"
@@ -247,7 +369,7 @@ const Home = (): React.ReactElement => {
                                     You haven't created any time capsules yet.
                                     Start preserving your memories today!
                                 </p>
-                                <Link to="/create">
+                                <Link to="/capsule/create">
                                     <Button
                                         size="sm"
                                         className="h-7 text-xs py-0.5"
@@ -257,6 +379,186 @@ const Home = (): React.ReactElement => {
                                 </Link>
                             </div>
                         </Card>
+                    )}
+                    {capsules && capsules.length > 0 && (
+                        <div className="mt-4">
+                            <div className="flex justify-between items-center mb-2">
+                                <div className="text-xs text-slate-500">
+                                    Showing{" "}
+                                    {(currentPage - 1) * itemsPerPage + 1} to{" "}
+                                    {Math.min(
+                                        currentPage * itemsPerPage,
+                                        totalItems
+                                    )}{" "}
+                                    of {totalItems} capsules
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <Label
+                                        htmlFor="itemsPerPage"
+                                        className="text-xs text-slate-600"
+                                    >
+                                        Show:
+                                    </Label>
+                                    <Select
+                                        onValueChange={handleItemsPerPageChange}
+                                        value={itemsPerPage.toString()}
+                                    >
+                                        <SelectTrigger
+                                            id="itemsPerPage"
+                                            className="w-[80px] h-8"
+                                        >
+                                            <SelectValue placeholder="5" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="5">5</SelectItem>
+                                            <SelectItem value="10">
+                                                10
+                                            </SelectItem>
+                                            <SelectItem value="20">
+                                                20
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            <Pagination>
+                                <PaginationContent>
+                                    <PaginationItem>
+                                        <PaginationPrevious
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                goToPreviousPage();
+                                            }}
+                                            className={
+                                                currentPage === 1
+                                                    ? "pointer-events-none opacity-50"
+                                                    : ""
+                                            }
+                                        />
+                                    </PaginationItem>
+
+                                    {Array.from({
+                                        length: Math.min(totalPages, 5),
+                                    }).map((_, i) => {
+                                        let pageNum = i + 1;
+
+                                        // For more than 5 pages, adjust which pages are shown
+                                        if (totalPages > 5) {
+                                            if (currentPage > 3) {
+                                                pageNum = currentPage - 3 + i;
+                                            }
+
+                                            // Ensure we don't exceed totalPages
+                                            if (
+                                                pageNum + 4 > totalPages &&
+                                                i >= 3
+                                            ) {
+                                                pageNum = totalPages - 4 + i;
+                                            }
+                                        }
+
+                                        // Add ellipsis if needed
+                                        if (totalPages > 5) {
+                                            if (i === 0 && currentPage > 3) {
+                                                return (
+                                                    <React.Fragment
+                                                        key={`start-${i}`}
+                                                    >
+                                                        <PaginationItem>
+                                                            <PaginationLink
+                                                                href="#"
+                                                                onClick={(
+                                                                    e
+                                                                ) => {
+                                                                    e.preventDefault();
+                                                                    handlePageChange(
+                                                                        1
+                                                                    );
+                                                                }}
+                                                            >
+                                                                1
+                                                            </PaginationLink>
+                                                        </PaginationItem>
+                                                        {currentPage > 4 && (
+                                                            <PaginationItem>
+                                                                <PaginationEllipsis />
+                                                            </PaginationItem>
+                                                        )}
+                                                    </React.Fragment>
+                                                );
+                                            }
+
+                                            if (
+                                                i === 4 &&
+                                                currentPage < totalPages - 2
+                                            ) {
+                                                return (
+                                                    <React.Fragment
+                                                        key={`end-${i}`}
+                                                    >
+                                                        <PaginationItem>
+                                                            <PaginationEllipsis />
+                                                        </PaginationItem>
+                                                        <PaginationItem>
+                                                            <PaginationLink
+                                                                href="#"
+                                                                onClick={(
+                                                                    e
+                                                                ) => {
+                                                                    e.preventDefault();
+                                                                    handlePageChange(
+                                                                        totalPages
+                                                                    );
+                                                                }}
+                                                            >
+                                                                {totalPages}
+                                                            </PaginationLink>
+                                                        </PaginationItem>
+                                                    </React.Fragment>
+                                                );
+                                            }
+                                        }
+
+                                        return (
+                                            <PaginationItem key={pageNum}>
+                                                <PaginationLink
+                                                    href="#"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handlePageChange(
+                                                            pageNum
+                                                        );
+                                                    }}
+                                                    isActive={
+                                                        pageNum === currentPage
+                                                    }
+                                                >
+                                                    {pageNum}
+                                                </PaginationLink>
+                                            </PaginationItem>
+                                        );
+                                    })}
+
+                                    <PaginationItem>
+                                        <PaginationNext
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                goToNextPage();
+                                            }}
+                                            className={
+                                                currentPage === totalPages
+                                                    ? "pointer-events-none opacity-50"
+                                                    : ""
+                                            }
+                                        />
+                                    </PaginationItem>
+                                </PaginationContent>
+                            </Pagination>
+                        </div>
                     )}
                 </div>
             )}

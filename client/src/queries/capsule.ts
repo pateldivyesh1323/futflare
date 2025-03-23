@@ -7,10 +7,10 @@ import {
     PresignedAWSResponse,
 } from "../types";
 
-export const getCapsules = async () => {
+export const getCapsules = async ({ sortBy }: { sortBy: string }) => {
     const { data } = await apiClient.get<
         APIResponseType<CapsuleWithoutContent[]>
-    >("/api/capsule");
+    >(`/api/capsule?sortBy=${sortBy}`);
     return data;
 };
 

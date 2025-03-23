@@ -35,7 +35,7 @@ func AuthenticationMiddleware() func(next http.Handler) http.Handler {
 		provider.KeyFunc,
 		validator.RS256,
 		issuerUrl.String(),
-		[]string{config.AuthAudience},
+		[]string{"https://" + config.AuthAudience},
 		validator.WithCustomClaims(
 			func() validator.CustomClaims {
 				return &CustomClaims{}
