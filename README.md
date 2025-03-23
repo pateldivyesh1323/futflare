@@ -2,6 +2,8 @@
 
 Your ultimate time capsule
 
+![image](/assets/images/futflare.png)
+
 ## Overview
 
 Futflare is a modern web application designed to serve as your ultimate time capsule. It leverages a variety of technologies to provide a seamless and efficient user experience.
@@ -17,9 +19,14 @@ The project is still in development and is not yet ready for production. Feel fr
 
 ## Technologies Used
 
--   **Client**: React, TypeScript, Vite
--   **Server**: Go, Fiber
--   **Database**: MongoDB
+<p align="center">
+  <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React">
+  <img src="https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white" alt="Go">
+  <img src="https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB">
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind">
+  <img src="https://img.shields.io/badge/Auth0-EB5424?style=for-the-badge&logo=auth0&logoColor=white" alt="Auth0">
+</p>
 
 ## Installation
 

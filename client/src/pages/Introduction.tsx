@@ -28,8 +28,7 @@ const Introduction = (): React.ReactElement => {
 
     return (
         <div className="flex flex-col min-h-[calc(100vh-4rem)] overflow-hidden">
-            <section className="relative overflow-hidden py-24 md:py-36">
-                {/* Animated background elements */}
+            <section className="relative overflow-hidden py-30 md:py-26">
                 <div className="absolute inset-0 -z-10">
                     <div
                         className="absolute top-20 left-1/4 h-96 w-96 rounded-full bg-purple-500/30 blur-3xl animate-pulse"
