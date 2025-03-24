@@ -5,12 +5,25 @@ import {
     CreateCapsuleType,
     ContentType,
     PresignedAWSResponse,
+    APIResponseWithPagination,
 } from "../types";
 
-export const getCapsules = async ({ sortBy }: { sortBy: string }) => {
+export const getCapsules = async ({
+    sortBy,
+    searchQuery,
+    page,
+    limit,
+}: {
+    sortBy: string;
+    searchQuery: string;
+    page: number;
+    limit: number;
+}) => {
     const { data } = await apiClient.get<
-        APIResponseType<CapsuleWithoutContent[]>
-    >(`/api/capsule?sortBy=${sortBy}`);
+        APIResponseWithPagination<CapsuleWithoutContent[]>
+    >(
+        `/api/capsule?sortBy=${sortBy}&searchQuery=${searchQuery}&page=${page}&limit=${limit}`
+    );
     return data;
 };
 

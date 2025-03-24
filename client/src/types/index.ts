@@ -52,3 +52,19 @@ export interface PresignedAWSResponse {
     content_type: ContentType;
     final_url: string;
 }
+
+export interface PaginationMetadata {
+    totalCount: number;
+    currentCount: number;
+    totalPages: number;
+    currentPage: number;
+}
+
+export interface PaginatedResponse<T> extends PaginationMetadata {
+    data: T;
+}
+
+export interface APIResponseWithPagination<T> {
+    message: string;
+    data: PaginatedResponse<T>;
+}

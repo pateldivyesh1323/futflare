@@ -64,22 +64,17 @@ const Navbar = (): React.ReactElement => {
 
                             <DropdownMenu>
                                 <DropdownMenuTrigger>
-                                    <Button
-                                        variant="ghost"
-                                        className="rounded-full h-8 w-8 p-0"
-                                    >
-                                        <Avatar className="h-8 w-8 ring-2 ring-indigo-100">
-                                            <AvatarImage
-                                                src={user?.picture}
-                                                alt={user?.name || "User"}
-                                            />
-                                            <AvatarFallback className="bg-indigo-100 text-indigo-700">
-                                                {user?.given_name?.charAt(0) ||
-                                                    user?.name?.charAt(0) ||
-                                                    "U"}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                    </Button>
+                                    <Avatar className="h-8 w-8 ring-2 ring-indigo-100">
+                                        <AvatarImage
+                                            src={user?.picture}
+                                            alt={user?.name || "User"}
+                                        />
+                                        <AvatarFallback className="bg-indigo-100 text-indigo-700">
+                                            {user?.given_name?.charAt(0) ||
+                                                user?.name?.charAt(0) ||
+                                                "U"}
+                                        </AvatarFallback>
+                                    </Avatar>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent
                                     align="end"

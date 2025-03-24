@@ -3,7 +3,9 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"math"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -197,6 +199,14 @@ func CreateCapsule(w http.ResponseWriter, r *http.Request) {
 	utils.SendJSONResponse(w, http.StatusCreated, "Successfully created capsule", nil)
 }
 
+type PaginationResponse struct {
+	Data         []primitive.M `json:"data"`
+	TotalCount   int64         `json:"totalCount"`
+	CurrentCount int           `json:"currentCount"`
+	TotalPages   int           `json:"totalPages"`
+	CurrentPage  int           `json:"currentPage"`
+}
+
 func GetAllCapsules(w http.ResponseWriter, r *http.Request) {
 	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer")
 	id, fullId, err := utils.GetIDFromToken(token)
@@ -212,25 +222,69 @@ func GetAllCapsules(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	page := 1
+	limit := 10
+
+	if pageStr := r.URL.Query().Get("page"); pageStr != "" {
+		if pageNum, err := strconv.Atoi(pageStr); err == nil && pageNum > 0 {
+			page = pageNum
+		}
+	}
+
+	if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
+		if limitStr, err := strconv.Atoi(limitStr); err == nil && limitStr > 0 {
+			limit = limitStr
+		}
+	}
+
+	searchQuery := r.URL.Query().Get("searchQuery")
 	sortParam := r.URL.Query().Get("sortBy")
 	sortOrder := -1
 	if sortParam == "oldest" {
 		sortOrder = 1
 	}
-	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: sortOrder}})
-	cursor, err := capsuleCollection.Find(context.Background(), bson.M{
+
+	opts := options.Find().SetSort(bson.D{{Key: "created_at", Value: sortOrder}}).
+		SetSkip(int64((page - 1) * limit)).
+		SetLimit(int64(limit))
+
+	filter := bson.M{
 		"$or": []bson.M{
 			{"creator": id},
 			{"participant_emails": bson.M{"$elemMatch": bson.M{"$eq": userDetails.Email}}},
 		},
-	}, opts)
+	}
+
+	if searchQuery != "" {
+		filter = bson.M{
+			"$and": []bson.M{
+				filter,
+				{
+					"$or": []bson.M{
+						{"title": bson.M{"$regex": searchQuery, "$options": "i"}},
+						{"description": bson.M{"$regex": searchQuery, "$options": "i"}},
+					},
+				},
+			},
+		}
+	}
+
+	totalCount, err := capsuleCollection.CountDocuments(context.Background(), filter)
+	if err != nil {
+		utils.SendJSONResponse(w, http.StatusInternalServerError, "Internal server error", nil)
+		return
+	}
+
+	totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
+
+	cursor, err := capsuleCollection.Find(context.Background(), filter, opts)
 	if err != nil {
 		utils.SendJSONResponse(w, http.StatusInternalServerError, "Internal server error", nil)
 		return
 	}
 	defer cursor.Close(context.Background())
 
-	var capsule []primitive.M
+	var capsules []primitive.M
 
 	for cursor.Next(context.Background()) {
 		var cap bson.M
@@ -249,10 +303,18 @@ func GetAllCapsules(w http.ResponseWriter, r *http.Request) {
 			"participant_emails":  cap["participant_emails"],
 			"scheduled_open_date": cap["scheduled_open_date"],
 		}
-		capsule = append(capsule, filteredCap)
+		capsules = append(capsules, filteredCap)
 	}
 
-	utils.SendJSONResponse(w, http.StatusOK, "Successfully fetched capsules", capsule)
+	response := PaginationResponse{
+		Data:         capsules,
+		TotalCount:   totalCount,
+		CurrentCount: len(capsules),
+		TotalPages:   totalPages,
+		CurrentPage:  page,
+	}
+
+	utils.SendJSONResponse(w, http.StatusOK, "Successfully fetched capsules", response)
 }
 
 func GetCapsule(w http.ResponseWriter, r *http.Request) {
