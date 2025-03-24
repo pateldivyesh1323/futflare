@@ -53,3 +53,10 @@ export const getPresignedUrl = async ({
     >("/api/uploader/presigned-url", { content_type, file_name });
     return data;
 };
+
+export const deleteCapsule = async (id: string) => {
+    const { data } = await apiClient.delete<APIResponseType<void>>(
+        `/api/capsule/${id}`
+    );
+    return data;
+};

@@ -14,6 +14,7 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/api/capsule", handlers.CreateCapsule).Methods("POST")
 	r.HandleFunc("/api/capsule", handlers.GetAllCapsules).Methods("GET")
 	r.HandleFunc("/api/capsule/{id}", handlers.GetCapsule).Methods("GET")
+	r.HandleFunc("/api/capsule/{id}", handlers.DeleteCapsule).Methods("Delete")
 	r.HandleFunc("/api/uploader/presigned-url", handlers.GeneratePresignedURL).Methods("POST")
 
 	return r

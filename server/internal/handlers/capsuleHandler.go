@@ -382,3 +382,34 @@ func GetCapsule(w http.ResponseWriter, r *http.Request) {
 
 	utils.SendJSONResponse(w, http.StatusOK, "Successfully fetched capsule", response)
 }
+
+func DeleteCapsule(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id := params["id"]
+
+	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer")
+	userId, _, _ := utils.GetIDFromToken(token)
+
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		utils.SendJSONResponse(w, http.StatusBadRequest, "Invalid capsule ID", nil)
+		return
+	}
+
+	deleteResult, err := capsuleCollection.DeleteOne(context.Background(), bson.M{
+		"_id":     objectId,
+		"creator": userId,
+	})
+
+	if err != nil {
+		utils.SendJSONResponse(w, http.StatusInternalServerError, "Internal server error", nil)
+		return
+	}
+
+	if deleteResult.DeletedCount == 0 {
+		utils.SendJSONResponse(w, http.StatusNotFound, "Capsule not found", nil)
+		return
+	}
+
+	utils.SendJSONResponse(w, http.StatusOK, "Capsule deleted successfully", nil)
+}

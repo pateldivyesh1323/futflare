@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useUserAuth } from "../providers/UserAuthProvider";
-import { useQuery } from "@tanstack/react-query";
-import { getCapsules } from "../queries";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getCapsules, deleteCapsule } from "../queries";
 import { getIdFromSub } from "../utils";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -15,7 +15,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, Lock, Unlock, User, Calendar, Users } from "lucide-react";
+import {
+    Clock,
+    Lock,
+    Unlock,
+    User,
+    Calendar,
+    Users,
+    Trash2,
+} from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -34,11 +42,27 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useDebounce } from "use-debounce";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { AxiosError } from "axios";
+import { APIResponseType } from "@/types";
 
 const Home = (): React.ReactElement => {
     const { user } = useUserAuth();
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
+    const queryClient = useQueryClient();
 
     const [sortBy, setSortBy] = useState(
         searchParams.get("sortBy") || "latest"
@@ -73,6 +97,19 @@ const Home = (): React.ReactElement => {
                 page: currentPage,
                 limit: itemsPerPage,
             }),
+    });
+
+    const { mutate: deleteCapsuleMutation } = useMutation({
+        mutationFn: (id: string) => deleteCapsule(id),
+        onSuccess: () => {
+            toast.success("Capsule deleted successfully");
+            queryClient.invalidateQueries({ queryKey: ["capsules"] });
+        },
+        onError: (error: AxiosError<APIResponseType<void>>) => {
+            toast.error(
+                error?.response?.data?.message || "Error deleting capsule"
+            );
+        },
     });
 
     useEffect(() => {
@@ -341,8 +378,50 @@ const Home = (): React.ReactElement => {
                                     )}
                             </CardContent>
 
-                            {capsule.is_opened && (
-                                <CardFooter className="justify-end">
+                            <CardFooter className="justify-end gap-2">
+                                {capsule.creator ===
+                                    getIdFromSub(user?.sub || "") && (
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                className="gap-1 text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors text-xs py-0.5 h-7"
+                                            >
+                                                <Trash2 className="h-3 w-3" />
+                                                <span>Delete</span>
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>
+                                                    Delete Time Capsule
+                                                </AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Are you sure you want to
+                                                    delete this time capsule?
+                                                    This action cannot be
+                                                    undone.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>
+                                                    Cancel
+                                                </AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    onClick={() =>
+                                                        deleteCapsuleMutation(
+                                                            capsule._id
+                                                        )
+                                                    }
+                                                    className="bg-red-600 hover:bg-red-700"
+                                                >
+                                                    Delete
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                )}
+                                {capsule.is_opened && (
                                     <Link
                                         to={`/capsule/${capsule._id}`}
                                         className="w-full sm:w-auto"
@@ -367,8 +446,8 @@ const Home = (): React.ReactElement => {
                                             </svg>
                                         </Button>
                                     </Link>
-                                </CardFooter>
-                            )}
+                                )}
+                            </CardFooter>
                         </Card>
                     ))}
                 </div>
